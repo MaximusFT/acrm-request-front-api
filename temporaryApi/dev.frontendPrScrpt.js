@@ -13,7 +13,7 @@ jQuery(document).ready(function($) {
         }
     }));
 
-    $('body').on('click', 'form input[type=submit]', function() {
+    $('body').on('click', 'form [type=submit]', function() {
         var form = $(this).parents('form').attr('id');
         $.ajax({
             url: 'http://dev.mapqo.com/api/getDocumentFields',
