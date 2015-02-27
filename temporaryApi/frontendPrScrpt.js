@@ -27,7 +27,7 @@ jQuery(document).ready(function($) {
                 if (response.form && response.fields) {
                     var formData = [];
                     $($.map(response.fields, function(id) {
-                        var val = $('#' + id).attr('type') !== 'checkbox' ? $('#' + id).val() : $('#' + id).prop('checked');
+                        var val = id.indexOf('Comments') === 0 ? '' : $('#' + id).attr('type') !== 'checkbox' ? $('#' + id).val() : $('#' + id).prop('checked');
                         if (val) {
                             formData.push({
                                 htmlId: id,
@@ -127,7 +127,7 @@ jQuery(document).ready(function($) {
                 }
             }
         });
-        return false;
+        return true;
     });
 });
 /* jshint ignore:end */
