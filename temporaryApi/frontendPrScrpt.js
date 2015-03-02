@@ -13,8 +13,10 @@ jQuery(document).ready(function($) {
         }
     }));
 
-    $('body').on('click', 'form [type=submit]', function() {
+    $('body').on('click', 'form [type=submit]', function(event) {
         var form = $(this).parents('form').attr('id');
+        if(form && !(form.indexOf('fc') === 0))
+            event.preventDefault();
         $.ajax({
             url: 'https://acrm.mapqo.com/api/getDocumentFields',
             type: 'GET',
@@ -56,14 +58,16 @@ jQuery(document).ready(function($) {
                     }));
                     var analyticsData = {};
                     $.ajax({
-                        url: 'http://api.hostip.info/get_html.php',
+                        url: 'https://jsonipgeobase.appspot.com',
                         type: 'GET',
+                        dataType: 'jsonp',
+                        crossDomain: true,
                         success: function(res) {
-                            var temp = res.split(':');
-                            analyticsData.ip = temp[temp.length - 1].trim();
+                            if(res && res.ip)
+                                analyticsData.ip = res.ip;
                         },
                         error: function(err) {
-                            console.error('err');
+                            console.error(err);
                         }
                     }).always(function() {
                         if ($.sessionStorage('url_local'))
@@ -126,16 +130,22 @@ jQuery(document).ready(function($) {
                                 }
                             },
                             error: function(err) {
-                                console.log(err);
+                                console.error(err);
                             }
+                        }).always(function() {
+                            return true;
                         });
                     });
                 } else {
                     console.log('debug:', response);
+                    return true;
                 }
+            },
+            error: function(err) {
+                console.error(err);
+                return true;
             }
         });
-        return true;
     });
 });
 /* jshint ignore:end */
