@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
                 if (response.form && response.fields) {
                     var formData = [];
                     $($.map(response.fields, function(id) {
-                        var val = id.indexOf('Comments') === 0 ? '' : $('#' + id).attr('type') !== 'checkbox' ? $('#' + id).val() : $('#' + id).prop('checked');
+                        var val = id.indexOf('Comments') === 0 ? '' : $('#' + id).attr('type') !== 'checkbox' && $('#' + id).attr('type') !== 'radio' ? $('#' + id).val() : $('#' + id).prop('checked');
                         if (val) {
                             formData.push({
                                 htmlId: id,
@@ -90,6 +90,7 @@ jQuery(document).ready(function($) {
                             type: 'POST',
                             dataType: 'json',
                             data: {
+                                form: form,
                                 formData: formData,
                                 href: window.location.protocol + '//' + window.location.host + window.location.pathname,
                                 analyticsData: analyticsData
