@@ -95,7 +95,15 @@ jQuery(document).ready(function($) {
                                 if (res.ga && res.ga.category && res.ga.action) {
                                     switch (res.ga.version) {
                                         case 0:
-                                            _gaq.push(['_trackEvent', res.ga.category, res.ga.action, res.ga.opt_label ? res.ga.opt_label : null, res.ga.opt_value ? res.ga.opt_value : null]);
+                                            var gaData = [];
+                                            gaData[0] = '_trackEvent';
+                                            gaData[1] = res.ga.category;
+                                            gaData[2] = res.ga.action;
+                                            if (res.ga.opt_label)
+                                                gaData[3] = res.ga.opt_label;
+                                            if (res.ga.opt_label && res.ga.opt_value)
+                                                gaData[4] = res.ga.opt_value;
+                                            _gaq.push(gaData);
                                             break;
                                         case 1:
                                             var gaData = {
