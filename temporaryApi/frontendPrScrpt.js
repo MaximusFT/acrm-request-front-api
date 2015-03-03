@@ -15,8 +15,13 @@ jQuery(document).ready(function($) {
 
     $('body').on('click', 'form [type=submit]', function(event) {
         var form = $(this).parents('form').attr('id');
-        if(form && !(form.indexOf('fc') === 0))
+        if (form && !(form.indexOf('fc') === 0) && $('#' + form).get(0).checkValidity() === true) {
             event.preventDefault();
+        }
+        if ($('#' + form).get(0).checkValidity() === false) {
+            return true;
+        }
+        $(this).attr('disabled', true);
         $.ajax({
             url: 'https://acrm.mapqo.com/api/getDocumentFields',
             type: 'GET',
@@ -63,7 +68,7 @@ jQuery(document).ready(function($) {
                         dataType: 'jsonp',
                         crossDomain: true,
                         success: function(res) {
-                            if(res && res.ip)
+                            if (res && res.ip)
                                 analyticsData.ip = res.ip;
                         },
                         error: function(err) {
@@ -134,16 +139,19 @@ jQuery(document).ready(function($) {
                                 console.error(err);
                             }
                         }).always(function() {
+                            $(this).removeAttr('disabled');
                             return true;
                         });
                     });
                 } else {
                     console.log('debug:', response);
+                    $(this).removeAttr('disabled');
                     return true;
                 }
             },
             error: function(err) {
                 console.error(err);
+                $(this).removeAttr('disabled');
                 return true;
             }
         });

@@ -15,8 +15,15 @@ jQuery(document).ready(function($) {
 
     $('body').on('click', 'form [type=submit]', function(event) {
         var form = $(this).parents('form').attr('id');
-        if(form && !(form.indexOf('fc') === 0))
+        if (form && !(form.indexOf('fc') === 0) && $('#' + form).get(0).checkValidity() === true) {
+            console.log('preventDefault');
             event.preventDefault();
+        }
+        if ($('#' + form).get(0).checkValidity() === false) {
+            console.log('invald form');
+            return true;
+        }
+        $(this).attr('disabled', true);
         $.ajax({
             url: 'http://dev.mapqo.com/api/getDocumentFields',
             type: 'GET',
@@ -29,7 +36,7 @@ jQuery(document).ready(function($) {
                 if (response.form && response.fields) {
                     var formData = [];
                     $($.map(response.fields, function(id) {
-                        var val = id.indexOf('Comments') === 0 ? '' : $('#' + id).attr('type') !== 'checkbox' ? $('#' + id).val() : $('#' + id).prop('checked');
+                        var val = id.indexOf('Comments') === 0 ? '' : $('#' + id).attr('type') !== 'checkbox' && $('#' + id).attr('type') !== 'radio' ? $('#' + id).val() : $('#' + id).prop('checked');
                         if (val) {
                             formData.push({
                                 htmlId: id,
@@ -63,7 +70,7 @@ jQuery(document).ready(function($) {
                         dataType: 'jsonp',
                         crossDomain: true,
                         success: function(res) {
-                            if(res && res.ip)
+                            if (res && res.ip)
                                 analyticsData.ip = res.ip;
                         },
                         error: function(err) {
@@ -90,6 +97,7 @@ jQuery(document).ready(function($) {
                             type: 'POST',
                             dataType: 'json',
                             data: {
+                                form: form,
                                 formData: formData,
                                 href: window.location.protocol + '//' + window.location.host + window.location.pathname,
                                 analyticsData: analyticsData
@@ -133,16 +141,19 @@ jQuery(document).ready(function($) {
                                 console.error(err);
                             }
                         }).always(function() {
+                            $(this).removeAttr('disabled');
                             return true;
                         });
                     });
                 } else {
                     console.log('debug:', response);
+                    $(this).removeAttr('disabled');
                     return true;
                 }
             },
             error: function(err) {
                 console.error(err);
+                $(this).removeAttr('disabled');
                 return true;
             }
         });
