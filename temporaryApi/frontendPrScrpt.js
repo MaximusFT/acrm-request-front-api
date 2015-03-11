@@ -1,27 +1,31 @@
 /* jshint ignore:start */
 jQuery(document).ready(function($) {
 
-    if (!$.sessionStorage('url_local'))
-        $.sessionStorage('url_local', window.location.href);
-    if (!$.sessionStorage('url_referer'))
-        $.sessionStorage('url_referer', document.referrer);
-    var params = window.location.search.substring(1).split('&');
-    $($.map(params, function(pair) {
-        var temp = pair.split('=');
-        if (['utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign'].indexOf(temp[0]) !== -1) {
-            $.sessionStorage(temp[0], temp[1]);
-        }
-    }));
+    if (typeof(Storage) !== 'undefined') {
+        if (!localStorage.getItem('url_local'))
+            localStorage.setItem('url_local', window.location.href);
+        if (!localStorage.getItem('url_referer'))
+            localStorage.setItem('url_referer', document.referrer);
+        var params = window.location.search.substring(1).split('&');
+        $($.map(params, function(pair) {
+            var temp = pair.split('=');
+            if (['utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign'].indexOf(temp[0]) !== -1)
+                localStorage.setItem(temp[0], temp[1]);
+        }));
+    }
 
     $('body').on('click', 'form [type=submit]', function(event) {
         var form = $(this).parents('form').attr('id');
         if (form && !(form.indexOf('fc') === 0) && $('#' + form).get(0).checkValidity() === true) {
+            console.log('preventDefault');
             event.preventDefault();
         }
         if ($('#' + form).get(0).checkValidity() === false) {
+            console.log('invald form');
             return true;
         }
-        $(this).attr('disabled', true);
+        var button = $(this);
+        button.attr('disabled', true);
         $.ajax({
             url: 'https://acrm.mapqo.com/api/getDocumentFields',
             type: 'GET',
@@ -34,7 +38,7 @@ jQuery(document).ready(function($) {
                 if (response.form && response.fields) {
                     var formData = [];
                     $($.map(response.fields, function(id) {
-                        var val = (id.indexOf('Comments') === 0 || id.indexOf('Komen') === 0) ? '' : $('#' + id).attr('type') !== 'checkbox' && $('#' + id).attr('type') !== 'radio' ? $('#' + id).val() : $('#' + id).prop('checked');
+                        var val = $('#' + id).attr('type') !== 'checkbox' && $('#' + id).attr('type') !== 'radio' ? $('#' + id).val() : $('#' + id).prop('checked');
                         if (val) {
                             formData.push({
                                 htmlId: id,
@@ -62,6 +66,7 @@ jQuery(document).ready(function($) {
                         }
                     }));
                     var analyticsData = {};
+                    analyticsData.browser = $.browser;
                     $.ajax({
                         url: 'https://jsonipgeobase.appspot.com',
                         type: 'GET',
@@ -75,21 +80,21 @@ jQuery(document).ready(function($) {
                             console.error(err);
                         }
                     }).always(function() {
-                        if ($.sessionStorage('url_local'))
-                            analyticsData.url_local = $.sessionStorage('url_local');
-                        if ($.sessionStorage('url_referer'))
-                            analyticsData.url_referer = $.sessionStorage('url_referer');
+                        if (localStorage.getItem('url_local'))
+                            analyticsData.url_local = localStorage.getItem('url_local');
+                        if (localStorage.getItem('url_referer'))
+                            analyticsData.url_referer = localStorage.getItem('url_referer');
                         analyticsData.url_form = window.location.href;
-                        if ($.sessionStorage('utm_source'))
-                            analyticsData.utm_source = $.sessionStorage('utm_source');
-                        if ($.sessionStorage('utm_medium'))
-                            analyticsData.utm_medium = $.sessionStorage('utm_medium');
-                        if ($.sessionStorage('utm_term'))
-                            analyticsData.utm_term = $.sessionStorage('utm_term');
-                        if ($.sessionStorage('utm_content'))
-                            analyticsData.utm_content = $.sessionStorage('utm_content');
-                        if ($.sessionStorage('utm_campaign'))
-                            analyticsData.utm_campaign = $.sessionStorage('utm_campaign');
+                        if (localStorage.getItem('utm_source'))
+                            analyticsData.utm_source = localStorage.getItem('utm_source');
+                        if (localStorage.getItem('utm_medium'))
+                            analyticsData.utm_medium = localStorage.getItem('utm_medium');
+                        if (localStorage.getItem('utm_term'))
+                            analyticsData.utm_term = localStorage.getItem('utm_term');
+                        if (localStorage.getItem('utm_content'))
+                            analyticsData.utm_content = localStorage.getItem('utm_content');
+                        if (localStorage.getItem('utm_campaign'))
+                            analyticsData.utm_campaign = localStorage.getItem('utm_campaign');
                         $.ajax({
                             url: 'https://acrm.mapqo.com/api/sendUserRequest',
                             type: 'POST',
@@ -137,21 +142,23 @@ jQuery(document).ready(function($) {
                             },
                             error: function(err) {
                                 console.error(err);
+                                button.removeAttr('disabled');
+                                return true;
                             }
                         }).always(function() {
-                            $(this).removeAttr('disabled');
+                            button.removeAttr('disabled');
                             return true;
                         });
                     });
                 } else {
                     console.log('debug:', response);
-                    $(this).removeAttr('disabled');
+                    button.removeAttr('disabled');
                     return true;
                 }
             },
             error: function(err) {
                 console.error(err);
-                $(this).removeAttr('disabled');
+                button.removeAttr('disabled');
                 return true;
             }
         });

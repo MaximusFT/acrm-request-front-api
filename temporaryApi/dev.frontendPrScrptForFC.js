@@ -17,7 +17,7 @@ jQuery(document).ready(function($) {
     $('body').on('click', 'form [type=submit]', function(event) {
         var form = $(this).parents('form').attr('id');
         $.ajax({
-            url: 'https://acrm.mapqo.com/api/getDocumentFields',
+            url: 'http://dev.mapqo.com/api/getDocumentFields',
             type: 'GET',
             dataType: 'jsonp',
             data: {
@@ -86,7 +86,7 @@ jQuery(document).ready(function($) {
                         if (localStorage.getItem('utm_campaign'))
                             analyticsData.utm_campaign = localStorage.getItem('utm_campaign');
                         $.ajax({
-                            url: 'https://acrm.mapqo.com/api/sendUserRequest',
+                            url: 'http://dev.mapqo.com/api/sendUserRequest',
                             type: 'POST',
                             dataType: 'json',
                             data: {

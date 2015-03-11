@@ -1,18 +1,17 @@
 /* jshint ignore:start */
 jQuery(document).ready(function($) {
 
-    if (typeof(Storage) !== 'undefined') {
-        if (!localStorage.getItem('url_local'))
-            localStorage.setItem('url_local', window.location.href);
-        if (!localStorage.getItem('url_referer'))
-            localStorage.setItem('url_referer', document.referrer);
-        var params = window.location.search.substring(1).split('&');
-        $($.map(params, function(pair) {
-            var temp = pair.split('=');
-            if (['utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign'].indexOf(temp[0]) !== -1)
-                localStorage.setItem(temp[0], temp[1]);
-        }));
-    }
+    if (!$.sessionStorage('url_local'))
+        $.sessionStorage('url_local', window.location.href);
+    if (!$.sessionStorage('url_referer'))
+        $.sessionStorage('url_referer', document.referrer);
+    var params = window.location.search.substring(1).split('&');
+    $($.map(params, function(pair) {
+        var temp = pair.split('=');
+        if (['utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign'].indexOf(temp[0]) !== -1) {
+            $.sessionStorage(temp[0], temp[1]);
+        }
+    }));
 
     $('body').on('click', 'form [type=submit]', function(event) {
         var form = $(this).parents('form').attr('id');
@@ -56,8 +55,7 @@ jQuery(document).ready(function($) {
                         }
                     }));
                     var analyticsData = {};
-                    analyticsData.browser = $.browser;
-                    $.ajax({
+                    /*$.ajax({
                         url: 'https://jsonipgeobase.appspot.com',
                         type: 'GET',
                         dataType: 'jsonp',
@@ -69,22 +67,22 @@ jQuery(document).ready(function($) {
                         error: function(err) {
                             console.error(err);
                         }
-                    }).always(function() {
-                        if (localStorage.getItem('url_local'))
-                            analyticsData.url_local = localStorage.getItem('url_local');
-                        if (localStorage.getItem('url_referer'))
-                            analyticsData.url_referer = localStorage.getItem('url_referer');
+                    }).always(function() {*/
+                        if ($.sessionStorage('url_local'))
+                            analyticsData.url_local = $.sessionStorage('url_local');
+                        if ($.sessionStorage('url_referer'))
+                            analyticsData.url_referer = $.sessionStorage('url_referer');
                         analyticsData.url_form = window.location.href;
-                        if (localStorage.getItem('utm_source'))
-                            analyticsData.utm_source = localStorage.getItem('utm_source');
-                        if (localStorage.getItem('utm_medium'))
-                            analyticsData.utm_medium = localStorage.getItem('utm_medium');
-                        if (localStorage.getItem('utm_term'))
-                            analyticsData.utm_term = localStorage.getItem('utm_term');
-                        if (localStorage.getItem('utm_content'))
-                            analyticsData.utm_content = localStorage.getItem('utm_content');
-                        if (localStorage.getItem('utm_campaign'))
-                            analyticsData.utm_campaign = localStorage.getItem('utm_campaign');
+                        if ($.sessionStorage('utm_source'))
+                            analyticsData.utm_source = $.sessionStorage('utm_source');
+                        if ($.sessionStorage('utm_medium'))
+                            analyticsData.utm_medium = $.sessionStorage('utm_medium');
+                        if ($.sessionStorage('utm_term'))
+                            analyticsData.utm_term = $.sessionStorage('utm_term');
+                        if ($.sessionStorage('utm_content'))
+                            analyticsData.utm_content = $.sessionStorage('utm_content');
+                        if ($.sessionStorage('utm_campaign'))
+                            analyticsData.utm_campaign = $.sessionStorage('utm_campaign');
                         $.ajax({
                             url: 'https://acrm.mapqo.com/api/sendUserRequest',
                             type: 'POST',
@@ -136,7 +134,7 @@ jQuery(document).ready(function($) {
                         }).always(function() {
                             return true;
                         });
-                    });
+                    //});
                 } else {
                     console.log('debug:', response);
                     return true;
