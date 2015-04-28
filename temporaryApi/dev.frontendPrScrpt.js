@@ -15,12 +15,13 @@ jQuery(document).ready(function($) {
     }
 
     $('body').on('click', 'form [type=submit]', function(event) {
-        var form = $(this).parents('form').attr('id');
-        if (form && !(form.indexOf('fc') === 0) && $('#' + form).get(0).checkValidity() === true) {
+        var form = $(this).parents('form'),
+            formId = form.attr('id');
+        if (formId && !(formId.indexOf('fc') === 0) && $('#' + formId).get(0).checkValidity() === true && form.attr('action') === undefined) {
             console.log('preventDefault');
             event.preventDefault();
         }
-        if ($('#' + form).get(0).checkValidity() === false) {
+        if ($('#' + formId).get(0).checkValidity() === false) {
             console.log('invalid form');
             return true;
         }
@@ -29,12 +30,12 @@ jQuery(document).ready(function($) {
 
         var logData = {
             uri: window.location.href,
-            form: form,
+            form: formId,
             formData: [],
             browser: $.browser ? $.browser : window.navigator.userAgent
         };
 
-        $('#' + form + ' input, #' + form + ' select, #' + form + ' checkbox, #' + form + ' radio, #' + form + ' textarea').each(
+        $('#' + formId + ' input, #' + formId + ' select, #' + formId + ' checkbox, #' + formId + ' radio, #' + formId + ' textarea').each(
             function(index) {
                 var input = $(this);
                 logData.formData.push({
@@ -63,7 +64,7 @@ jQuery(document).ready(function($) {
                 dataType: 'jsonp',
                 data: {
                     href: window.location.protocol + '//' + window.location.host + window.location.pathname,
-                    form: form
+                    form: formId
                 },
                 success: function(response) {
                     if (response.form && response.fields) {
@@ -118,7 +119,7 @@ jQuery(document).ready(function($) {
                             type: 'POST',
                             dataType: 'json',
                             data: {
-                                form: form,
+                                form: formId,
                                 formData: formData,
                                 href: window.location.protocol + '//' + window.location.host + window.location.pathname,
                                 analyticsData: analyticsData
@@ -158,23 +159,40 @@ jQuery(document).ready(function($) {
                                     $('#' + response.form).empty().append(res.rf.thanksBlock);
                                 }
                                 button.removeAttr('disabled');
+                                if (form.attr('action') !== undefined) {
+                                    console.log('manually call submit');
+                                    form.submit();
+                                }
                                 return true;
                             },
                             error: function(err) {
                                 console.error(err);
                                 button.removeAttr('disabled');
+                                if (form.attr('action') !== undefined) {
+                                    console.log('manually call submit');
+                                    form.submit();
+                                }
                                 return true;
                             }
                         });
                     } else {
                         console.log('debug:', response);
                         button.removeAttr('disabled');
+                        console.log(form.attr('action'));
+                        if (form.attr('action') !== undefined) {
+                            console.log('manually call submit');
+                            form.submit();
+                        }
                         return true;
                     }
                 },
                 error: function(err) {
                     console.error(err);
                     button.removeAttr('disabled');
+                    if (form.attr('action') !== undefined) {
+                        console.log('manually call submit');
+                        form.submit();
+                    }
                     return true;
                 }
             });
